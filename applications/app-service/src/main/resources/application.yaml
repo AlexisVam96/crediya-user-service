@@ -1,0 +1,31 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: crediya-user-service
+  devtools:
+    add-properties: false
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/db_crediya_user
+    username: postgres
+    password: postgres
+  sql:
+    init:
+      platform: postgresql
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
+
