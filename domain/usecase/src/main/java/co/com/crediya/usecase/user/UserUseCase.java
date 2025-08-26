@@ -24,11 +24,6 @@ public class UserUseCase {
         return transactionManager.doInTransaction(userRepository.findAll());
     }
 
-    public Mono<User> findUserById(Integer id) {
-        log.info("UserUseCase.findUserById: Starting findUserById for user");
-        return transactionManager.doInTransaction(userRepository.findById(id));
-    }
-
     public Mono<User> save(User user) {
         log.info("UserUseCase.save: Starting save for user");
         return transactionManager.doInTransaction(Mono.just(user)

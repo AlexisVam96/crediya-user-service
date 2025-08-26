@@ -6,8 +6,5 @@ import reactor.core.publisher.Mono;
 
 public interface RoleRepository {
 
-    public Flux<Role> findAll();
     public Mono<Role> findById(Integer id);
-    public Mono<Role> save(Role role);
-
 }
