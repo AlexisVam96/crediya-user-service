@@ -12,7 +12,7 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 public class Role {
 
-    private Integer id_role;
-    private String roleName;
+    private Integer idRole;
+    private String name;
     private String description;
 }

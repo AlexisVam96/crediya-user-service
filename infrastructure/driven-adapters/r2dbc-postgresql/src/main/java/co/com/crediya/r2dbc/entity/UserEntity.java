@@ -16,7 +16,7 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_user;
+    private Integer idUser;
     private String firstName;
     private String lastName;
     private LocalDate birthDate;
@@ -24,4 +24,5 @@ public class UserEntity {
     private String phoneNumber;
     private String email;
     private java.math.BigDecimal salary;
+    private Integer idRole;
 }

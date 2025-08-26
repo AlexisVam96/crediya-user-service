@@ -27,14 +27,6 @@ public class Handler {
                 .flatMap(userDtoList -> ServerResponse.ok().bodyValue(userDtoList));
     }
 
-    public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
-        Integer idUser = Integer.parseInt(serverRequest.pathVariable("idUser"));
-        return userUseCase.findUserById(idUser)
-                .map(userDtoMapper::toResponse)
-                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto))
-                .switchIfEmpty(ServerResponse.notFound().build());
-    }
-
     public Mono<ServerResponse> listenPOSTSaveUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateUserDto.class)
                 .map(userDtoMapper::toModel)

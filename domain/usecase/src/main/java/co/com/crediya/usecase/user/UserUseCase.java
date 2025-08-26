@@ -1,5 +1,6 @@
 package co.com.crediya.usecase.user;
 
+import co.com.crediya.model.role.gateways.RoleRepository;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,9 @@ public class UserUseCase {
     private static final Logger log = Logger.getLogger(UserUseCase.class.getName());
 
     private final UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
+
     private final TransactionManager transactionManager;
 
     public Flux<User> getAllUsers() {
@@ -25,37 +29,42 @@ public class UserUseCase {
     }
 
     public Mono<User> save(User user) {
-        log.info("UserUseCase.save: Starting save for user");
-        return transactionManager.doInTransaction(Mono.just(user)
-                .doOnNext(u -> log.info("Validating user: "+ u))
-                .filter(u -> hasText(u.getFirstName()) && hasText(u.getLastName()) && hasText(u.getEmail()) && u.getSalary() != null)
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.warning("Required fields missing for user: " + user);
-                    return Mono.error(new IllegalArgumentException("Required fields must not be null or empty"));
-                }))
-                .filter(u -> EMAIL_PATTERN.matcher(u.getEmail()).matches())
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.warning("Invalid email format: " + user.getEmail());
-                    return Mono.error(new IllegalArgumentException("Invalid email format"));
-                }))
-                .filter(u -> u.getSalary().doubleValue() >= 0 && u.getSalary().doubleValue() <= 15000000)
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.warning("Salary out of range for user: " + user.getSalary());
-                    return Mono.error(new IllegalArgumentException("Salary must be between 0 and 15,000,000"));
-                }))
-                .flatMap(u -> {
-                    log.info("Checking if email already exists: " + u.getEmail());
-                    return userRepository.existsByEmail(u.getEmail())
-                            .flatMap(exists -> {
-                                if (exists) {
-                                    log.warning("Email already registered: " + u.getEmail());
-                                    return Mono.error(new IllegalArgumentException("Email already registered"));
-                                } else {
-                                    log.info("Saving user: " + u);
-                                    return userRepository.save(u);
-                                }
-                            });
-                }));
+        log.info("UserUseCase.save: Starting save for user " + user);
+
+        if (!hasText(user.getFirstName()) || !hasText(user.getLastName()) ||
+                !hasText(user.getEmail()) || user.getSalary() == null) {
+            log.warning("Required fields missing for user: " + user);
+            return Mono.error(new IllegalArgumentException("Required fields must not be null or empty"));
+        }
+
+        if (!EMAIL_PATTERN.matcher(user.getEmail()).matches()) {
+            log.warning("Invalid email format: " + user.getEmail());
+            return Mono.error(new IllegalArgumentException("Invalid email format"));
+        }
+
+        if (user.getSalary().doubleValue() < 0 || user.getSalary().doubleValue() > 15000000) {
+            log.warning("Salary out of range for user: " + user.getSalary());
+            return Mono.error(new IllegalArgumentException("Salary must be between 0 and 15,000,000"));
+        }
+
+        return transactionManager.doInTransaction(
+                userRepository.existsByEmail(user.getEmail())
+                        .flatMap(emailExists -> {
+                            if (emailExists) {
+                                log.warning("Email already registered: " + user.getEmail());
+                                return Mono.error(new IllegalArgumentException("Email already registered"));
+                            }
+                            return roleRepository.existsByIdRole(user.getIdRole());
+                        })
+                        .flatMap(roleExists -> {
+                            if (!roleExists) {
+                                log.warning("idRole does not exist: " + user.getIdRole());
+                                return Mono.error(new IllegalArgumentException("idRole does not exist"));
+                            }
+                            log.info("Saving user: " + user);
+                            return userRepository.save(user);
+                        })
+        );
     }
 
     private static boolean hasText(String str) {

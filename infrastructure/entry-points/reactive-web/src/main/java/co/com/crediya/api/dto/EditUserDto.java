@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EditUserDto {
 
-    private Integer id_user;
+    private Integer idUser;
     private String firstName;
     private String lastName;
     private String birthDate;
