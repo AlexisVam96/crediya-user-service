@@ -1,5 +1,6 @@
 package co.com.crediya.usecase.user;
 
+import co.com.crediya.model.role.gateways.RoleRepository;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
 import co.com.crediya.usecase.transaction.TransactionManager;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -30,16 +32,22 @@ public class UserUseCaseTest {
     @Mock
     private TransactionManager transactionManager;
 
+    @Mock
+    private RoleRepository roleRepository;
+
     private User user;
 
     @BeforeEach
     void setUp() {
         user = new User();
+        user.setIdUser(1);
         user.setFirstName("John");
         user.setLastName("Doe");
+        user.setBirthDate(LocalDate.of(1996,11,25));
+        user.setPhoneNumber("1234567890");
         user.setEmail("john.doe@example.com");
         user.setSalary(new BigDecimal(10000));
-        // Set other fields as needed
+        user.setIdRole(1);
     }
 
     @Test
@@ -55,7 +63,9 @@ public class UserUseCaseTest {
     @Test
     void mustSaveUserSuccessfully() {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(Mono.just(false));
+        when(roleRepository.existsByIdRole(user.getIdRole())).thenReturn(Mono.just(true));
         when(userRepository.save(any(User.class))).thenReturn(Mono.just(user));
+        when(transactionManager.doInTransaction(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         StepVerifier.create(userUseCase.save(user))
                 .expectNext(user)
@@ -65,6 +75,7 @@ public class UserUseCaseTest {
     @Test
     void mustFailToSaveWhenEmailAlreadyExists() {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(Mono.just(true));
+        when(transactionManager.doInTransaction(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         StepVerifier.create(userUseCase.save(user))
                 .expectErrorMatches(throwable ->
@@ -81,6 +92,41 @@ public class UserUseCaseTest {
                 .expectErrorMatches(throwable ->
                         throwable instanceof IllegalArgumentException &&
                                 throwable.getMessage().equals("Required fields must not be null or empty"))
+                .verify();
+    }
+
+    @Test
+    void mustFailToSaveWhenEmailFormatAreMissing() {
+        user.setEmail("jhon.doe1gmail.com"); // or set to null to test missing field
+
+        StepVerifier.create(userUseCase.save(user))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("Invalid email format"))
+                .verify();
+    }
+
+    @Test
+    void mustFailToSaveWhenRangeSalary() {
+        user.setSalary(new BigDecimal(-100)); // or set to null to test missing field
+
+        StepVerifier.create(userUseCase.save(user))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("Salary must be between 0 and 15,000,000"))
+                .verify();
+    }
+
+    @Test
+    void mustFailToSaveWhenRoleAlreadyExists() {
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(Mono.just(false));
+        when(roleRepository.existsByIdRole(1)).thenReturn(Mono.just(false));
+        when(transactionManager.doInTransaction(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        StepVerifier.create(userUseCase.save(user))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("idRole does not exist"))
                 .verify();
     }
 

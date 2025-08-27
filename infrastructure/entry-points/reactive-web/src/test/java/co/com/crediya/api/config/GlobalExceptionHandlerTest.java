@@ -1,0 +1,41 @@
+package co.com.crediya.api.config;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@WebFluxTest(controllers = GlobalExceptionHandlerTest.DummyController.class)
+@Import(GlobalExceptionHandler.class)
+@ContextConfiguration(classes = {GlobalExceptionHandler.class, GlobalExceptionHandlerTest.DummyController.class})
+class GlobalExceptionHandlerTest {
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @RestController
+    static class DummyController {
+        @GetMapping("/error")
+        public String error() {
+            throw new RuntimeException("Test exception");
+        }
+    }
+
+    @Test
+    void handleGenericException_shouldReturnInternalServerError() {
+        webTestClient.get()
+                .uri("/error")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("Internal Server Error")
+                .jsonPath("$.status").isEqualTo(500)
+                .jsonPath("$.message").isEqualTo("Test exception");
+    }
+}

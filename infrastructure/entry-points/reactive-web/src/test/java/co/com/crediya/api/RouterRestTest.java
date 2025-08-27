@@ -1,5 +1,6 @@
 package co.com.crediya.api;
 
+import co.com.crediya.api.dto.CreateUserDto;
 import co.com.crediya.api.dto.UserDto;
 import co.com.crediya.api.mapper.UserDtoMapper;
 import co.com.crediya.model.user.User;
@@ -13,14 +14,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
@@ -53,6 +58,15 @@ class RouterRestTest {
         return user;
     }
 
+    private CreateUserDto createUserDto() {
+        CreateUserDto createUserDto = new CreateUserDto();
+        createUserDto.setFirstName("John");
+        createUserDto.setLastName("Doe");
+        createUserDto.setEmail("john.doe@example.com");
+        // Set other required fields as needed
+        return createUserDto;
+    }
+
 
     @Test
     void testListenGETAllUsers() {
@@ -79,26 +93,25 @@ class RouterRestTest {
     }
 
     @Test
-    void testListenGETAllUsersSuccessfully2() {
-        UserDto userDto = userDto();
+    void testListenPOSTSaveUser_shouldReturnOkResponse() {
+        CreateUserDto createUserDto = createUserDto();
         User user = user();
+        UserDto userDtoResponse = userDto();
 
-        when(userUseCase.getAllUsers()).thenReturn(Flux.just(user));
-        when(userDtoMapper.toResponse(List.of(user))).thenReturn(Collections.singletonList(userDto));
+        when(userDtoMapper.toModel(any(CreateUserDto.class))).thenReturn(user);
+        when(userUseCase.save(any(User.class))).thenReturn(Mono.just(user));
+        when(userDtoMapper.toResponse(any(User.class))).thenReturn(userDtoResponse);
 
-
-        Flux<UserDto> responseBody = webTestClient.get()
+        webTestClient.post()
                 .uri("/api/v1/user")
-                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(createUserDto)
                 .exchange()
                 .expectStatus().isOk()
-                .returnResult(UserDto.class)
-                .getResponseBody();
-
-        StepVerifier.create(responseBody)
-                .expectSubscription()
-                .expectNext(userDto)
-                .verifyComplete();
+                .expectBody(UserDto.class)
+                .value(response -> {
+                    Assertions.assertThat(response.getEmail()).isEqualTo("john.doe@example.com");
+                });
     }
 
 
