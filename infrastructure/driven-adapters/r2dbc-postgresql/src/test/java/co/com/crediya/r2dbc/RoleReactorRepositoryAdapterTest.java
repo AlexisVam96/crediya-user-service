@@ -36,4 +36,5 @@ class RoleReactorRepositoryAdapterTest {
 
         verify(repository, times(1)).existsByIdRole(idRole);
     }
+
 }

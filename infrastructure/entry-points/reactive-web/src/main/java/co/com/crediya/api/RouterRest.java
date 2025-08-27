@@ -1,6 +1,7 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.dto.CreateUserDto;
+import co.com.crediya.api.dto.ErrorResponse;
 import co.com.crediya.api.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,7 +57,14 @@ public class RouterRest {
                             schema = @Schema(implementation = UserDto.class)
                         )
                     ),
-                    @ApiResponse(responseCode = "400", description = "Error en la petición")
+                    @ApiResponse(
+                        responseCode = "400",
+                        description = "Error en la petición",
+                        content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                        )
+                    )
                 },
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Nuevo Usuario",

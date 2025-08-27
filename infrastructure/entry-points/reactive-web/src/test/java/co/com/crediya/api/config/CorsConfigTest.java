@@ -1,5 +1,7 @@
 package co.com.crediya.api.config;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
@@ -30,5 +32,18 @@ class CorsConfigTest {
         assertTrue(corsConfig.getAllowedMethods().contains("GET"));
         assertTrue(corsConfig.getAllowedHeaders().contains(CorsConfiguration.ALL));
         assertTrue(corsConfig.getAllowCredentials());
+    }
+
+    @Test
+    void customOpenAPI_shouldReturnConfiguredOpenAPI() {
+        CorsConfig config = new CorsConfig();
+        OpenAPI openAPI = config.customOpenAPI();
+
+        assertNotNull(openAPI);
+        Info info = openAPI.getInfo();
+        assertNotNull(info);
+        assertEquals("Crediya User Service API", info.getTitle());
+        assertEquals("1.0.0", info.getVersion());
+        assertEquals("API documentation for Crediya User Service", info.getDescription());
     }
 }

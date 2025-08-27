@@ -32,10 +32,10 @@ class GlobalExceptionHandlerTest {
                 .uri("/error")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().is5xxServerError()
+                .expectStatus().isBadRequest()
                 .expectBody()
-                .jsonPath("$.error").isEqualTo("Internal Server Error")
-                .jsonPath("$.status").isEqualTo(500)
+                .jsonPath("$.error").isEqualTo("Bad Request")
+                .jsonPath("$.status").isEqualTo(400)
                 .jsonPath("$.message").isEqualTo("Test exception");
     }
 }

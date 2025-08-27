@@ -54,4 +54,20 @@ class UserReactorRepositoryAdapterTest {
         Assertions.assertNotNull(adapter);
     }
 
+    @Test
+    void findAll_shouldReturnAllUsers() {
+        User user1 = new User(); // Set fields as needed
+        User user2 = new User();
+        UserReactorRepositoryAdapter spyAdapter = spy(adapter);
+
+        doReturn(Flux.just(user1, user2)).when(spyAdapter).findAll();
+
+        Flux<User> result = spyAdapter.findAll();
+
+        StepVerifier.create(result)
+                .expectNext(user1)
+                .expectNext(user2)
+                .verifyComplete();
+    }
+
 }
