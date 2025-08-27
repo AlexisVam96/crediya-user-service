@@ -26,6 +26,7 @@ public class RoleReactorRepositoryAdapter extends ReactiveAdapterOperations<Role
 
     @Override
     public Mono<Boolean> existsByIdRole(Integer idRole) {
+        log.info("Checking existence of Role with idRole: {}", idRole);
         return repository.existsByIdRole(idRole);
     }
 }

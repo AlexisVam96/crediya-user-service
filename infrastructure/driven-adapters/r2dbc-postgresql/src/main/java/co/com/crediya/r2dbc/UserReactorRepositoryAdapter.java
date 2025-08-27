@@ -3,12 +3,14 @@ package co.com.crediya.r2dbc;
 import co.com.crediya.model.user.User;
 import co.com.crediya.r2dbc.entity.UserEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
+import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
+@Slf4j
 public class UserReactorRepositoryAdapter extends ReactiveAdapterOperations<User, UserEntity, Integer, UserReactorRepository>
  implements co.com.crediya.model.user.gateways.UserRepository
 {
@@ -23,10 +25,13 @@ public class UserReactorRepositoryAdapter extends ReactiveAdapterOperations<User
 
     @Override
     public Mono<Boolean> existsByEmail(String email) {
+        log.info("Verifying if user exists with email: {}", email);
         return repository.existsByEmail(email);
     }
 
     public Flux<User> findAll() {
+        log.info("Fetching all users from the database");
         return super.findAll();
     }
+
 }
