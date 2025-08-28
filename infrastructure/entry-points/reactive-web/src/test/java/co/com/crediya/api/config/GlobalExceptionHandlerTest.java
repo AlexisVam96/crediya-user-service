@@ -1,5 +1,6 @@
 package co.com.crediya.api.config;
 
+import co.com.crediya.model.exception.UserCustomException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
@@ -21,8 +22,8 @@ class GlobalExceptionHandlerTest {
     @RestController
     static class DummyController {
         @GetMapping("/error")
-        public String error() {
-            throw new RuntimeException("Test exception");
+        public void error() throws UserCustomException {
+            throw new UserCustomException("Test exception", "TEST_CODE");
         }
     }
 
@@ -36,6 +37,7 @@ class GlobalExceptionHandlerTest {
                 .expectBody()
                 .jsonPath("$.error").isEqualTo("Bad Request")
                 .jsonPath("$.status").isEqualTo(400)
-                .jsonPath("$.message").isEqualTo("Test exception");
+                .jsonPath("$.message").isEqualTo("Test exception")
+                .jsonPath("$.code").isEqualTo("TEST_CODE");
     }
 }

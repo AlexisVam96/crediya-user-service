@@ -1,5 +1,6 @@
 package co.com.crediya.usecase.user;
 
+import co.com.crediya.model.exception.UserCustomException;
 import co.com.crediya.model.role.gateways.RoleRepository;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
@@ -34,17 +35,17 @@ public class UserUseCase {
         if (!hasText(user.getFirstName()) || !hasText(user.getLastName()) ||
                 !hasText(user.getEmail()) || user.getSalary() == null) {
             log.warning("Required fields missing for user: " + user);
-            return Mono.error(new IllegalArgumentException("Required fields must not be null or empty"));
+            return Mono.error(new UserCustomException("Required fields must not be null or empty", "USR-001"));
         }
 
         if (!EMAIL_PATTERN.matcher(user.getEmail()).matches()) {
             log.warning("Invalid email format: " + user.getEmail());
-            return Mono.error(new IllegalArgumentException("Invalid email format"));
+            return Mono.error(new UserCustomException("Invalid email format", "USR-002"));
         }
 
         if (user.getSalary().doubleValue() < 0 || user.getSalary().doubleValue() > 15000000) {
             log.warning("Salary out of range for user: " + user.getSalary());
-            return Mono.error(new IllegalArgumentException("Salary must be between 0 and 15,000,000"));
+            return Mono.error(new UserCustomException("Salary must be between 0 and 15,000,000", "USR-003"));
         }
 
         return transactionManager.doInTransaction(
@@ -52,14 +53,14 @@ public class UserUseCase {
                         .flatMap(emailExists -> {
                             if (emailExists) {
                                 log.warning("Email already registered: " + user.getEmail());
-                                return Mono.error(new IllegalArgumentException("Email already registered"));
+                                return Mono.error(new UserCustomException("Email already registered", "USR-004"));
                             }
                             return roleRepository.existsByIdRole(user.getIdRole());
                         })
                         .flatMap(roleExists -> {
                             if (!roleExists) {
                                 log.warning("idRole does not exist: " + user.getIdRole());
-                                return Mono.error(new IllegalArgumentException("idRole does not exist"));
+                                return Mono.error(new UserCustomException("idRole does not exist", "USR-005"));
                             }
                             log.info("Saving user: " + user);
                             return userRepository.save(user);

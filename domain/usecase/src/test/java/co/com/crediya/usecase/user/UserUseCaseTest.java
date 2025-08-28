@@ -1,5 +1,6 @@
 package co.com.crediya.usecase.user;
 
+import co.com.crediya.model.exception.UserCustomException;
 import co.com.crediya.model.role.gateways.RoleRepository;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
@@ -79,7 +80,7 @@ public class UserUseCaseTest {
 
         StepVerifier.create(userUseCase.save(user))
                 .expectErrorMatches(throwable ->
-                        throwable instanceof IllegalArgumentException &&
+                        throwable instanceof UserCustomException &&
                                 throwable.getMessage().equals("Email already registered"))
                 .verify();
     }
@@ -90,7 +91,7 @@ public class UserUseCaseTest {
 
         StepVerifier.create(userUseCase.save(user))
                 .expectErrorMatches(throwable ->
-                        throwable instanceof IllegalArgumentException &&
+                        throwable instanceof UserCustomException &&
                                 throwable.getMessage().equals("Required fields must not be null or empty"))
                 .verify();
     }
@@ -101,7 +102,7 @@ public class UserUseCaseTest {
 
         StepVerifier.create(userUseCase.save(user))
                 .expectErrorMatches(throwable ->
-                        throwable instanceof IllegalArgumentException &&
+                        throwable instanceof UserCustomException &&
                                 throwable.getMessage().equals("Invalid email format"))
                 .verify();
     }
@@ -112,7 +113,7 @@ public class UserUseCaseTest {
 
         StepVerifier.create(userUseCase.save(user))
                 .expectErrorMatches(throwable ->
-                        throwable instanceof IllegalArgumentException &&
+                        throwable instanceof UserCustomException &&
                                 throwable.getMessage().equals("Salary must be between 0 and 15,000,000"))
                 .verify();
     }
@@ -125,7 +126,7 @@ public class UserUseCaseTest {
 
         StepVerifier.create(userUseCase.save(user))
                 .expectErrorMatches(throwable ->
-                        throwable instanceof IllegalArgumentException &&
+                        throwable instanceof UserCustomException &&
                                 throwable.getMessage().equals("idRole does not exist"))
                 .verify();
     }
