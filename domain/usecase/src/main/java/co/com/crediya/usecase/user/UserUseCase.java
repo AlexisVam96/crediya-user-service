@@ -1,5 +1,6 @@
 package co.com.crediya.usecase.user;
 
+import co.com.crediya.model.exception.ErrorType;
 import co.com.crediya.model.exception.UserCustomException;
 import co.com.crediya.model.role.gateways.RoleRepository;
 import co.com.crediya.model.user.User;
@@ -29,23 +30,28 @@ public class UserUseCase {
         return transactionManager.doInTransaction(userRepository.findAll());
     }
 
+    public Mono<User> getUserByDocumentNumber(String documentNumber) {
+        log.info("UserUseCase.getUserByDocumentNumber: Starting getUserByDocumentNumber for documentNumber " + documentNumber);
+        return transactionManager.doInTransaction(userRepository.findByDocumentNumber(documentNumber));
+    }
+
     public Mono<User> save(User user) {
         log.info("UserUseCase.save: Starting save for user " + user);
 
         if (!hasText(user.getFirstName()) || !hasText(user.getLastName()) ||
                 !hasText(user.getEmail()) || user.getSalary() == null) {
             log.warning("Required fields missing for user: " + user);
-            return Mono.error(new UserCustomException("Required fields must not be null or empty", "USR-001"));
+            return Mono.error(new UserCustomException("Required fields must not be null or empty", ErrorType.VALIDATION));
         }
 
         if (!EMAIL_PATTERN.matcher(user.getEmail()).matches()) {
             log.warning("Invalid email format: " + user.getEmail());
-            return Mono.error(new UserCustomException("Invalid email format", "USR-002"));
+            return Mono.error(new UserCustomException("Invalid email format", ErrorType.VALIDATION));
         }
 
         if (user.getSalary().doubleValue() < 0 || user.getSalary().doubleValue() > 15000000) {
             log.warning("Salary out of range for user: " + user.getSalary());
-            return Mono.error(new UserCustomException("Salary must be between 0 and 15,000,000", "USR-003"));
+            return Mono.error(new UserCustomException("Salary must be between 0 and 15,000,000", ErrorType.VALIDATION));
         }
 
         return transactionManager.doInTransaction(
@@ -53,14 +59,14 @@ public class UserUseCase {
                         .flatMap(emailExists -> {
                             if (emailExists) {
                                 log.warning("Email already registered: " + user.getEmail());
-                                return Mono.error(new UserCustomException("Email already registered", "USR-004"));
+                                return Mono.error(new UserCustomException("Email already registered", ErrorType.VALIDATION));
                             }
                             return roleRepository.existsByIdRole(user.getIdRole());
                         })
                         .flatMap(roleExists -> {
                             if (!roleExists) {
                                 log.warning("idRole does not exist: " + user.getIdRole());
-                                return Mono.error(new UserCustomException("idRole does not exist", "USR-005"));
+                                return Mono.error(new UserCustomException("idRole does not exist", ErrorType.VALIDATION));
                             }
                             log.info("Saving user: " + user);
                             return userRepository.save(user);

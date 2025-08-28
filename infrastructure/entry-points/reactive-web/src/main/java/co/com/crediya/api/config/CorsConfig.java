@@ -3,6 +3,7 @@ package co.com.crediya.api.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -36,5 +37,10 @@ public class CorsConfig {
                 .title("Crediya User Service API")
                 .version("1.0.0")
                 .description("API documentation for Crediya User Service"));
+    }
+
+    @Bean
+    public WebProperties.Resources webPropertiesResources() {
+        return new WebProperties().getResources();
     }
 }

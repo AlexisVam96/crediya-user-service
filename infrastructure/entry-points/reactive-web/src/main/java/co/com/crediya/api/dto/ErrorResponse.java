@@ -6,6 +6,9 @@ import lombok.Data;
 @Data
 public class ErrorResponse {
 
+    @Schema(description = "Error code", example = "USR-100")
+    private String code;
+
     @Schema(description = "Error type", example = "Bad Request")
     private String error;
 

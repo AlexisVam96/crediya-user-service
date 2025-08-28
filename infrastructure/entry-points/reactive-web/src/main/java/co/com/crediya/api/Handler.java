@@ -2,6 +2,8 @@ package co.com.crediya.api;
 
 import co.com.crediya.api.dto.CreateUserDto;
 import co.com.crediya.api.mapper.UserDtoMapper;
+import co.com.crediya.model.exception.ErrorType;
+import co.com.crediya.model.exception.UserCustomException;
 import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,14 @@ public class Handler {
                 .flatMap(userUseCase::save)
                 .map(userDtoMapper::toResponse)
                 .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto));
+    }
+
+    public Mono<ServerResponse> listenGETFindUserByDocumentNumber(ServerRequest serverRequest) {
+        String documentNumber = serverRequest.pathVariable("documentNumber");
+        return userUseCase.getUserByDocumentNumber(documentNumber)
+                .map(userDtoMapper::toResponse)
+                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto))
+                .switchIfEmpty(Mono.error(new UserCustomException("User not found", ErrorType.NOT_FOUND)));
     }
 
 }

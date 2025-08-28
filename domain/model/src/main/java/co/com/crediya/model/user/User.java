@@ -24,4 +24,5 @@ public class User {
     private String email;
     private BigDecimal salary;
     private Integer idRole;
+    private String documentNumber;
 }

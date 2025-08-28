@@ -5,6 +5,7 @@ import co.com.crediya.api.dto.ErrorResponse;
 import co.com.crediya.api.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -84,7 +85,8 @@ public class RouterRest {
                                         "  \"phoneNumber\": \"+1234567890\",\n" +
                                         "  \"email\": \"john.doe@crediya.com\",\n" +
                                         "  \"salary\": 3500.50,\n" +
-                                        "  \"idRole\": 2\n" +
+                                        "  \"idRole\": 2,\n" +
+                                        "  \"documentNumber\": \"12345678\"\n" +
                                         "}"
                             ),
                             @ExampleObject(
@@ -98,7 +100,8 @@ public class RouterRest {
                                         "  \"phoneNumber\": \"+9876543210\",\n" +
                                         "  \"email\": \"maria.lopez@crediya.com\",\n" +
                                         "  \"salary\": 5000.00,\n" +
-                                        "  \"idRole\": 1\n" +
+                                        "  \"idRole\": 1,\n" +
+                                        "  \"documentNumber\": \"12345678\"\n" +
                                         "}"
                             ),
                             @ExampleObject(
@@ -112,7 +115,8 @@ public class RouterRest {
                                         "  \"phoneNumber\": \"+9876543210\",\n" +
                                         "  \"email\": \"juan.perezcrediya.com\",\n" +
                                         "  \"salary\": 7000.00,\n" +
-                                        "  \"idRole\": 2\n" +
+                                        "  \"idRole\": 2,\n" +
+                                        "  \"documentNumber\": \"12345678\"\n" +
                                         "}"
                             ),
                             @ExampleObject(
@@ -125,7 +129,8 @@ public class RouterRest {
                                         "  \"phoneNumber\": \"+9876543210\",\n" +
                                         "  \"email\": \"carlos.perez@crediya.com\",\n" +
                                         "  \"salary\": 7000.00,\n" +
-                                        "  \"idRole\": 2\n" +
+                                        "  \"idRole\": 2,\n" +
+                                        "  \"documentNumber\": \"12345678\"\n" +
                                         "}"
                             ),
                             @ExampleObject(
@@ -139,7 +144,8 @@ public class RouterRest {
                                         "  \"phoneNumber\": \"+9876543210\",\n" +
                                         "  \"email\": \"ana.sanchez@crediya.com\",\n" +
                                         "  \"salary\": -1000.0,\n" +
-                                        "  \"idRole\": 2\n" +
+                                        "  \"idRole\": 2,\n" +
+                                        "  \"documentNumber\": \"12345678\"\n" +
                                         "}"
                             ),
                             @ExampleObject(
@@ -153,7 +159,8 @@ public class RouterRest {
                                         "  \"phoneNumber\": \"+9876543210\",\n" +
                                         "  \"email\": \"lucas.sandoval@crediya.com\",\n" +
                                         "  \"salary\": 1000.0,\n" +
-                                        "  \"idRole\": 2\n" +
+                                        "  \"idRole\": 2,\n" +
+                                        "  \"documentNumber\": \"12345678\"\n" +
                                         "}"
                             ),
                             @ExampleObject(
@@ -167,17 +174,43 @@ public class RouterRest {
                                         "  \"phoneNumber\": \"+9876543210\",\n" +
                                         "  \"email\": \"ramiro.jimenez@crediya.com\",\n" +
                                         "  \"salary\": 1000.0,\n" +
-                                        "  \"idRole\": 3\n" +
+                                        "  \"idRole\": 3,\n" +
+                                        "  \"documentNumber\": \"12345678\"\n" +
                                         "}"
                             )
                         }
                     )
                 )
             )
+        ),
+        @RouterOperation(
+            path = "/api/v1/user/{documentNumber}",
+            method = RequestMethod.GET,
+            beanClass = Handler.class,
+            beanMethod = "listenGETFindUserByDocumentNumber",
+            operation = @Operation(
+                operationId = "findUserByDocumentNumber",
+                summary = "Buscar Usuario por Número de Documento",
+                parameters = {
+                    @Parameter(name = "documentNumber", in = ParameterIn.PATH, description = "Número de documento del usuario", required = true, example = "123456789")
+                },
+                responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(
+                        responseCode = "404",
+                        description = "Usuario no encontrado",
+                        content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                        )
+                    )
+                }
+            )
         )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(GET("/api/v1/user"), handler::listenGETAllUsers)
-                .andRoute(POST("/api/v1/user"), handler::listenPOSTSaveUser);
+                .andRoute(POST("/api/v1/user"), handler::listenPOSTSaveUser)
+                .andRoute(GET("/api/v1/user/{documentNumber}"), handler::listenGETFindUserByDocumentNumber);
     }
 }

@@ -29,6 +29,15 @@ public class UserReactorRepositoryAdapter extends ReactiveAdapterOperations<User
         return repository.existsByEmail(email);
     }
 
+    @Override
+    public Mono<User> findByDocumentNumber(String documentNumber) {
+        return repository.findByDocumentNumber(documentNumber)
+                .map(entity -> {
+                    log.info("User found with document number: {}", documentNumber);
+                    return mapper.map(entity, User.class);
+                });
+    }
+
     public Flux<User> findAll() {
         log.info("Fetching all users from the database");
         return super.findAll();

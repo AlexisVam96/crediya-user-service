@@ -39,4 +39,7 @@ public class UserDto {
 
     @Schema(description = "User's role ID", example = "2")
     private Integer idRole;
+
+    @Schema(description = "User's document number", example = "123456789")
+    private String documentNumber;
 }
