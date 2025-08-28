@@ -2,14 +2,14 @@ package co.com.crediya.model.exception;
 
 public class UserCustomException extends Exception{
 
-    private String code;
+    private ErrorType type;
 
-    public UserCustomException(String message, String code) {
+    public UserCustomException(String message, ErrorType type) {
         super(message);
-        this.code = code;
+        this.type = type;
     }
 
-    public String getCode() {
-        return code;
+    public ErrorType getType() {
+        return type;
     }
 }
