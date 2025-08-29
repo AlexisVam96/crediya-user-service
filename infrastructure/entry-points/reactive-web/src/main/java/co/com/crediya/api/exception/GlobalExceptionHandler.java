@@ -1,5 +1,7 @@
 package co.com.crediya.api.exception;
 
+import co.com.crediya.model.exception.ErrorType;
+import co.com.crediya.model.exception.UserCustomException;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -32,10 +34,20 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
 
     protected Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
         Map<String, Object> errorPropertiesMap = getErrorAttributes(request, ErrorAttributeOptions.defaults());
+        HttpStatus status = mapToHttpStatus((ErrorType) errorPropertiesMap.get("type"));
 
-        return ServerResponse.status(errorPropertiesMap.get("status") != null ?
-                        HttpStatus.valueOf((Integer) errorPropertiesMap.get("status")) : HttpStatus.INTERNAL_SERVER_ERROR)
+        return ServerResponse.status(status)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(errorPropertiesMap));
+    }
+
+    private HttpStatus mapToHttpStatus(ErrorType error) {
+        return switch (error) {
+            case VALIDATION -> HttpStatus.BAD_REQUEST;
+            case NOT_FOUND  -> HttpStatus.NOT_FOUND;
+            case AUTH       -> HttpStatus.UNAUTHORIZED;
+            default         -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
+
     }
 }

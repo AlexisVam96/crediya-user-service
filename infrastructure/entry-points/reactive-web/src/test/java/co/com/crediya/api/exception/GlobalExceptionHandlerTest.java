@@ -36,23 +36,76 @@ class GlobalExceptionHandlerTest {
 
     @RestController
     static class DummyController {
-        @GetMapping("/error")
-        public void error() throws UserCustomException {
-            throw new UserCustomException("Test exception", ErrorType.VALIDATION);
+        @GetMapping("/error-validation")
+        public void errorValidation() throws UserCustomException {
+            throw new UserCustomException("Test exception validation", ErrorType.VALIDATION);
+        }
+
+        @GetMapping("/error-notfound")
+        public void errorNotFound() throws UserCustomException {
+            throw new UserCustomException("Test exception not found", ErrorType.NOT_FOUND);
+        }
+
+        @GetMapping("/error-auth")
+        public void errorAuth() throws UserCustomException {
+            throw new UserCustomException("Test exception authorization", ErrorType.AUTH);
+        }
+
+        @GetMapping("/error-system")
+        public void errorSystem() throws UserCustomException {
+            throw new UserCustomException("Test exception system", ErrorType.SYSTEM);
         }
     }
 
     @Test
-    void handleUserCustomException_shouldReturnCustomError() {
+    void handleUserCustomException_shouldReturnCustomErrorValidation() {
         webTestClient.get()
-                .uri("/error")
+                .uri("/error-validation")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
-                .jsonPath("$.error").isEqualTo("Bad Request")
-                .jsonPath("$.status").isEqualTo(400)
-                .jsonPath("$.message").isEqualTo("Test exception")
+                .jsonPath("$.path").isEqualTo("/error-validation")
+                .jsonPath("$.message").isEqualTo("Test exception validation")
                 .jsonPath("$.type").isEqualTo("VALIDATION");
+    }
+
+    @Test
+    void handleUserCustomException_shouldReturnCustomErrorNotFound() {
+        webTestClient.get()
+                .uri("/error-notfound")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/error-notfound")
+                .jsonPath("$.message").isEqualTo("Test exception not found")
+                .jsonPath("$.type").isEqualTo("NOT_FOUND");
+    }
+
+    @Test
+    void handleUserCustomException_shouldReturnCustomErrorAuth() {
+        webTestClient.get()
+                .uri("/error-auth")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/error-auth")
+                .jsonPath("$.message").isEqualTo("Test exception authorization")
+                .jsonPath("$.type").isEqualTo("AUTH");
+    }
+
+    @Test
+    void handleUserCustomException_shouldReturnCustomErrorSystem() {
+        webTestClient.get()
+                .uri("/error-system")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/error-system")
+                .jsonPath("$.message").isEqualTo("Test exception system")
+                .jsonPath("$.type").isEqualTo("SYSTEM");
     }
 }
