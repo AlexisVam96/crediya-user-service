@@ -4,6 +4,7 @@ public enum ErrorType {
     VALIDATION,
     NOT_FOUND,
     AUTH,
-    SYSTEM
+    SYSTEM,
+    FORBIDDEN
 
 }

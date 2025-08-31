@@ -11,4 +11,6 @@ public interface UserReactorRepository extends ReactiveCrudRepository<UserEntity
     Mono<Boolean> existsByEmail(String email);
 
     Mono<UserEntity> findByDocumentNumber(String documentNumber);
+
+    Mono<UserEntity> findByEmail(String email);
 }

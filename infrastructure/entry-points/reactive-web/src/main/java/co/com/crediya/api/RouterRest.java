@@ -211,6 +211,7 @@ public class RouterRest {
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(GET("/api/v1/user"), handler::listenGETAllUsers)
                 .andRoute(POST("/api/v1/user"), handler::listenPOSTSaveUser)
-                .andRoute(GET("/api/v1/user/{documentNumber}"), handler::listenGETFindUserByDocumentNumber);
+                .andRoute(GET("/api/v1/user/{documentNumber}"), handler::listenGETFindUserByDocumentNumber)
+                .andRoute(POST("/api/v1/login"), handler::listenPOSTloginUser);
     }
 }

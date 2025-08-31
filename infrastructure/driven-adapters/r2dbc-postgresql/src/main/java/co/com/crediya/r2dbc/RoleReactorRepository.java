@@ -9,4 +9,6 @@ import reactor.core.publisher.Mono;
 public interface RoleReactorRepository extends ReactiveCrudRepository<RoleEntity, Integer>, ReactiveQueryByExampleExecutor<RoleEntity> {
 
     Mono<Boolean> existsByIdRole(Integer idRole);
+
+    Mono<RoleEntity> findByIdRole(Integer idRole);
 }

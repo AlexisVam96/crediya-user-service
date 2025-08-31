@@ -43,8 +43,14 @@ public class Handler {
         String documentNumber = serverRequest.pathVariable("documentNumber");
         return userUseCase.getUserByDocumentNumber(documentNumber)
                 .map(userDtoMapper::toResponse)
-                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto))
-                .switchIfEmpty(Mono.error(new UserCustomException("User not found", ErrorType.NOT_FOUND)));
+                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto));
+    }
+
+    public Mono<ServerResponse> listenPOSTloginUser(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(CreateUserDto.class)
+                .map(userDtoMapper::toModel)
+                .flatMap(userUseCase::login)
+                .flatMap(token -> ServerResponse.ok().bodyValue(token));
     }
 
 }

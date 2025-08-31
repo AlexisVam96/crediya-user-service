@@ -3,6 +3,9 @@ package co.com.crediya.usecase.user;
 import co.com.crediya.model.exception.ErrorType;
 import co.com.crediya.model.exception.UserCustomException;
 import co.com.crediya.model.role.gateways.RoleRepository;
+import co.com.crediya.model.security.AuthToken;
+import co.com.crediya.model.security.TokenProvider;
+import co.com.crediya.model.security.PasswordEncoder;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +13,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import co.com.crediya.usecase.transaction.TransactionManager;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -25,6 +30,10 @@ public class UserUseCase {
 
     private final TransactionManager transactionManager;
 
+    private final TokenProvider tokenProvider;
+
+    private final PasswordEncoder passwordEncoder;
+
     public Flux<User> getAllUsers() {
         log.info("UserUseCase.getAllUsers: Starting getAllUsers for user");
         return transactionManager.doInTransaction(userRepository.findAll());
@@ -32,7 +41,28 @@ public class UserUseCase {
 
     public Mono<User> getUserByDocumentNumber(String documentNumber) {
         log.info("UserUseCase.getUserByDocumentNumber: Starting getUserByDocumentNumber for documentNumber " + documentNumber);
-        return transactionManager.doInTransaction(userRepository.findByDocumentNumber(documentNumber));
+        return transactionManager.doInTransaction(userRepository.findByDocumentNumber(documentNumber))
+                .switchIfEmpty(Mono.error(new UserCustomException("User's document number not found", ErrorType.NOT_FOUND)));
+    }
+
+    public Mono<AuthToken> login(User user) {
+        return userRepository.findByEmail(user.getEmail())
+            .switchIfEmpty(Mono.error(new UserCustomException("User not found", ErrorType.NOT_FOUND)))
+            .flatMap(userDb -> passwordEncoder.matches(user.getPassword(), userDb.getPassword())
+                .flatMap(isValid -> {
+                    if (!isValid) {
+                        return Mono.error(new UserCustomException("Invalid credentials", ErrorType.VALIDATION));
+                    }
+                    return roleRepository.findByIdRole(userDb.getIdRole())
+                        .switchIfEmpty(Mono.error(new UserCustomException("Role not found", ErrorType.NOT_FOUND)))
+                        .flatMap(role -> {
+                            Map<String, Object> claims = new HashMap<>();
+                            claims.put("role", role.getName());
+                            return tokenProvider.generateToken(userDb.getEmail(), claims)
+                                    .map(AuthToken::new);
+                        });
+                })
+            );
     }
 
     public Mono<User> save(User user) {
@@ -68,8 +98,16 @@ public class UserUseCase {
                                 log.warning("idRole does not exist: " + user.getIdRole());
                                 return Mono.error(new UserCustomException("idRole does not exist", ErrorType.VALIDATION));
                             }
-                            log.info("Saving user: " + user);
-                            return userRepository.save(user);
+                            // Encode password before saving
+                            return passwordEncoder.encode(user.getPassword())
+                                    .map(encodedPassword -> {
+                                        user.setPassword(encodedPassword);
+                                        return user;
+                                    });
+                        })
+                        .flatMap(userToSave -> {
+                            log.info("Saving user: " + userToSave);
+                            return userRepository.save(userToSave);
                         })
         );
     }

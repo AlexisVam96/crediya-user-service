@@ -26,4 +26,5 @@ public class UserEntity {
     private java.math.BigDecimal salary;
     private Integer idRole;
     private String documentNumber;
+    private String password;
 }

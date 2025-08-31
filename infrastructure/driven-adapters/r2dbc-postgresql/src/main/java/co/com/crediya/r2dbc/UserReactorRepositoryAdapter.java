@@ -38,6 +38,15 @@ public class UserReactorRepositoryAdapter extends ReactiveAdapterOperations<User
                 });
     }
 
+    @Override
+    public Mono<User> findByEmail(String email) {
+        return repository.findByEmail(email)
+                .map(entity -> {
+                    log.info("User found with email: {}", email);
+                    return mapper.map(entity, User.class);
+                });
+    }
+
     public Flux<User> findAll() {
         log.info("Fetching all users from the database");
         return super.findAll();

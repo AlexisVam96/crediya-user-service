@@ -25,4 +25,5 @@ public class User {
     private BigDecimal salary;
     private Integer idRole;
     private String documentNumber;
+    private String password;
 }

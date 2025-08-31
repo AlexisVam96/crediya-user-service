@@ -29,4 +29,13 @@ public class RoleReactorRepositoryAdapter extends ReactiveAdapterOperations<Role
         log.info("Checking existence of Role with idRole: {}", idRole);
         return repository.existsByIdRole(idRole);
     }
+
+    @Override
+    public Mono<Role> findByIdRole(Integer idRole) {
+        return repository.findByIdRole(idRole)
+                .map(roleEntity -> {
+                    log.info("Role found with idRole {}: {}", idRole, roleEntity);
+                    return mapper.map(roleEntity, Role.class);
+                });
+    }
 }

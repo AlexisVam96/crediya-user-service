@@ -42,4 +42,6 @@ public class UserDto {
 
     @Schema(description = "User's document number", example = "123456789")
     private String documentNumber;
+
+    private String password;
 }

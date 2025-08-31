@@ -6,4 +6,6 @@ import reactor.core.publisher.Mono;
 public interface RoleRepository {
 
     public Mono<Boolean> existsByIdRole(Integer idRole);
+
+    public Mono<Role> findByIdRole(Integer idRole);
 }

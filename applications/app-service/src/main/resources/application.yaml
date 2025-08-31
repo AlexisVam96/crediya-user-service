@@ -29,3 +29,7 @@ management:
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 
+jwt:
+  secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
+  expiration: 3600000 # 1 hour in milliseconds
+
