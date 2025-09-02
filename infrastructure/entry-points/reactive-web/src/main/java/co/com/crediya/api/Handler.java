@@ -44,7 +44,7 @@ public class Handler {
         return userUseCase.getUserByDocumentNumber(documentNumber)
                 .map(userDtoMapper::toResponse)
                 .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto))
-                .switchIfEmpty(Mono.error(new UserCustomException("User not found", ErrorType.NOT_FOUND)));
+                .switchIfEmpty(Mono.error(new UserCustomException("User's document number not found", ErrorType.NOT_FOUND)));
     }
 
 }

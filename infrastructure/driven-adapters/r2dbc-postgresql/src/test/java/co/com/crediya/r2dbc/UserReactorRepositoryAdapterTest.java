@@ -70,4 +70,45 @@ class UserReactorRepositoryAdapterTest {
                 .verifyComplete();
     }
 
+    @Test
+    void findByDocumentNumber_shouldReturnUser() {
+        String documentNumber = "12345678";
+        UserEntity userEntity = new UserEntity();
+        userEntity.setDocumentNumber(documentNumber);
+        User user = new User();
+        user.setDocumentNumber(documentNumber);
+
+        when(repository.findByDocumentNumber(documentNumber)).thenReturn(Mono.just(userEntity));
+        when(mapper.map(userEntity, User.class)).thenReturn(user);
+
+        Mono<User> result = adapter.findByDocumentNumber(documentNumber);
+
+        StepVerifier.create(result)
+                .expectNextMatches(u -> u.getDocumentNumber().equals(documentNumber))
+                .verifyComplete();
+
+        verify(repository, times(1)).findByDocumentNumber(documentNumber);
+        verify(mapper, times(1)).map(userEntity, User.class);
+    }
+
+    @Test
+    void findAll_shouldReturnAllUsers2() {
+        UserEntity entity1 = new UserEntity();
+        UserEntity entity2 = new UserEntity();
+        User user1 = new User();
+        User user2 = new User();
+
+        when(repository.findAll()).thenReturn(Flux.just(entity1, entity2));
+        when(mapper.map(entity1, User.class)).thenReturn(user1);
+        when(mapper.map(entity2, User.class)).thenReturn(user2);
+
+        Flux<User> result = adapter.findAll();
+
+        StepVerifier.create(result)
+                .expectNextMatches(u -> u.getDocumentNumber() == null)
+                .expectNextMatches(u -> u.getDocumentNumber() == null)
+                .verifyComplete();
+
+    }
+
 }
