@@ -2,6 +2,7 @@ package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.UserCustomException;
 import co.com.crediya.model.role.gateways.RoleRepository;
+import co.com.crediya.model.security.PasswordEncoder;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
 import co.com.crediya.usecase.transaction.TransactionManager;
@@ -36,6 +37,10 @@ public class UserUseCaseTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+
     private User user;
 
     @BeforeEach
@@ -49,6 +54,8 @@ public class UserUseCaseTest {
         user.setEmail("john.doe@example.com");
         user.setSalary(new BigDecimal(10000));
         user.setIdRole(1);
+        user.setDocumentNumber("87654321");
+        user.setPassword("securePassword");
     }
 
     @Test
@@ -67,6 +74,7 @@ public class UserUseCaseTest {
         when(roleRepository.existsByIdRole(user.getIdRole())).thenReturn(Mono.just(true));
         when(userRepository.save(any(User.class))).thenReturn(Mono.just(user));
         when(transactionManager.doInTransaction(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(passwordEncoder.encode(user.getPassword())).thenReturn(Mono.just("encodedPassword"));
 
         StepVerifier.create(userUseCase.save(user))
                 .expectNext(user)
