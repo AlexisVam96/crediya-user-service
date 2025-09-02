@@ -4,17 +4,13 @@ import co.com.crediya.api.dto.CreateUserDto;
 import co.com.crediya.api.mapper.UserDtoMapper;
 import co.com.crediya.model.exception.ErrorType;
 import co.com.crediya.model.exception.UserCustomException;
-import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
 
 @Component
 @RequiredArgsConstructor
@@ -43,7 +39,8 @@ public class Handler {
         String documentNumber = serverRequest.pathVariable("documentNumber");
         return userUseCase.getUserByDocumentNumber(documentNumber)
                 .map(userDtoMapper::toResponse)
-                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto));
+                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto))
+                .switchIfEmpty(Mono.error(new UserCustomException("User's document number not found", ErrorType.NOT_FOUND)));
     }
 
     public Mono<ServerResponse> listenPOSTloginUser(ServerRequest serverRequest) {

@@ -114,6 +114,24 @@ class RouterRestTest {
                 });
     }
 
+    @Test
+    void testListenGETFindUserByDocumentNumber_shouldReturnOkResponse() {
+        String documentNumber = "12345678";
+        User user = user();
+        UserDto userDtoResponse = userDto();
 
+        when(userUseCase.getUserByDocumentNumber(documentNumber)).thenReturn(Mono.just(user));
+        when(userDtoMapper.toResponse(user)).thenReturn(userDtoResponse);
+
+        webTestClient.get()
+                .uri("/api/v1/user/{documentNumber}", documentNumber)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserDto.class)
+                .value(response -> {
+                    Assertions.assertThat(response.getEmail()).isEqualTo("john.doe@example.com");
+                });
+    }
 
 }
