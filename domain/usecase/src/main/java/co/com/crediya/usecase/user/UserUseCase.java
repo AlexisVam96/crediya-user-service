@@ -47,7 +47,7 @@ public class UserUseCase {
 
     public Mono<AuthToken> login(User user) {
         return userRepository.findByEmail(user.getEmail())
-            .switchIfEmpty(Mono.error(new UserCustomException("User not found", ErrorType.NOT_FOUND)))
+            .switchIfEmpty(Mono.error(new UserCustomException("User's email not found", ErrorType.NOT_FOUND)))
             .flatMap(userDb -> passwordEncoder.matches(user.getPassword(), userDb.getPassword())
                 .flatMap(isValid -> {
                     if (!isValid) {
@@ -58,6 +58,7 @@ public class UserUseCase {
                         .flatMap(role -> {
                             Map<String, Object> claims = new HashMap<>();
                             claims.put("role", role.getName());
+                            claims.put("email", userDb.getEmail());
                             return tokenProvider.generateToken(userDb.getEmail(), claims)
                                     .map(AuthToken::new);
                         });

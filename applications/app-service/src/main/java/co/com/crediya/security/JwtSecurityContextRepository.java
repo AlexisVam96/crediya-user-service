@@ -1,5 +1,7 @@
 package co.com.crediya.security;
 
+import co.com.crediya.model.exception.ErrorType;
+import co.com.crediya.model.exception.UserCustomException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,6 @@ public class JwtSecurityContextRepository implements ServerSecurityContextReposi
             Authentication auth = new UsernamePasswordAuthenticationToken(authToken, authToken);
             return this.jwtAuthenticationManager.authenticate(auth).map(SecurityContextImpl::new);
         }
-        return Mono.empty();
+        return Mono.error(new UserCustomException("Missing or invalid Authorization header", ErrorType.AUTH));
     }
 }
