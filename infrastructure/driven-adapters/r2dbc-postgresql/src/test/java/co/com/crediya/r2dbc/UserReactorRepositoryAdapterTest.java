@@ -44,11 +44,11 @@ class UserReactorRepositoryAdapterTest {
     @Test
     void constructor_shouldCreateAdapter() {
         // Given
-        RoleReactorRepository repository = mock(RoleReactorRepository.class);
+        UserReactorRepository repository = mock(UserReactorRepository.class);
         ObjectMapper mapper = mock(ObjectMapper.class);
 
         // When
-        RoleReactorRepositoryAdapter adapter = new RoleReactorRepositoryAdapter(repository, mapper);
+        UserReactorRepositoryAdapter adapter = new UserReactorRepositoryAdapter(repository, mapper);
 
         // Then
         Assertions.assertNotNull(adapter);

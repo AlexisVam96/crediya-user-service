@@ -39,8 +39,7 @@ public class Handler {
         String documentNumber = serverRequest.pathVariable("documentNumber");
         return userUseCase.getUserByDocumentNumber(documentNumber)
                 .map(userDtoMapper::toResponse)
-                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto))
-                .switchIfEmpty(Mono.error(new UserCustomException("User's document number not found", ErrorType.NOT_FOUND)));
+                .flatMap(userDto -> ServerResponse.ok().bodyValue(userDto));
     }
 
     public Mono<ServerResponse> listenPOSTloginUser(ServerRequest serverRequest) {

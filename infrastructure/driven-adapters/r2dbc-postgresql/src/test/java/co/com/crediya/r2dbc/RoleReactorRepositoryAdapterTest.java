@@ -1,6 +1,7 @@
 package co.com.crediya.r2dbc;
 
 import co.com.crediya.model.role.Role;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,6 +22,19 @@ class RoleReactorRepositoryAdapterTest {
         repository = mock(RoleReactorRepository.class);
         mapper = mock(ObjectMapper.class);
         adapter = new RoleReactorRepositoryAdapter(repository, mapper);
+    }
+
+    @Test
+    void constructor_shouldCreateAdapter() {
+        // Given
+        RoleReactorRepository repository = mock(RoleReactorRepository.class);
+        ObjectMapper mapper = mock(ObjectMapper.class);
+
+        // When
+        RoleReactorRepositoryAdapter adapter = new RoleReactorRepositoryAdapter(repository, mapper);
+
+        // Then
+        Assertions.assertNotNull(adapter);
     }
 
     @Test
