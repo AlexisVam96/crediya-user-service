@@ -32,7 +32,8 @@ public class UserUseCase {
 
     public Mono<User> getUserByDocumentNumber(String documentNumber) {
         log.info("UserUseCase.getUserByDocumentNumber: Starting getUserByDocumentNumber for documentNumber " + documentNumber);
-        return transactionManager.doInTransaction(userRepository.findByDocumentNumber(documentNumber));
+        return transactionManager.doInTransaction(userRepository.findByDocumentNumber(documentNumber)
+                .switchIfEmpty(Mono.error(new UserCustomException("User's document number not found", ErrorType.NOT_FOUND))));
     }
 
     public Mono<User> save(User user) {
