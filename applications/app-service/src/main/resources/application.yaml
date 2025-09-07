@@ -9,9 +9,9 @@ spring:
   devtools:
     add-properties: false
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/db_crediya_user
-    username: postgres
-    password: postgres
+    url: r2dbc:postgresql://${SPRING_R2DBC_HOST:localhost}:5432/db_crediya_user
+    username: ${SPRING_R2DBC_USERNAME:admin}
+    password: ${SPRING_R2DBC_PASSWORD:admin}
   sql:
     init:
       platform: postgresql
@@ -32,4 +32,7 @@ cors:
 jwt:
   secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
   expiration: 3600000 # 1 hour in milliseconds
+
+db:
+  host: ${SPRING_R2DBC_HOST:localhost}
 
