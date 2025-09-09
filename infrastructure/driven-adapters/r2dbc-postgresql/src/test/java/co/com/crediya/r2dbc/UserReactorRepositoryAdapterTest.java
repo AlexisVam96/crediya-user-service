@@ -111,4 +111,25 @@ class UserReactorRepositoryAdapterTest {
 
     }
 
+    @Test
+    void findByEmail_shouldReturnUser() {
+        String email = "test@example.com";
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail(email);
+        User user = new User();
+        user.setEmail(email);
+
+        when(repository.findByEmail(email)).thenReturn(Mono.just(userEntity));
+        when(mapper.map(userEntity, User.class)).thenReturn(user);
+
+        Mono<User> result = adapter.findByEmail(email);
+
+        StepVerifier.create(result)
+                .expectNextMatches(u -> u.getEmail().equals(email))
+                .verifyComplete();
+
+        verify(repository, times(1)).findByEmail(email);
+        verify(mapper, times(1)).map(userEntity, User.class);
+    }
+
 }

@@ -2,12 +2,15 @@
 
     import co.com.crediya.model.exception.ErrorType;
     import co.com.crediya.model.exception.UserCustomException;
+    import lombok.RequiredArgsConstructor;
     import org.springframework.context.annotation.Bean;
     import org.springframework.context.annotation.Configuration;
     import org.springframework.core.io.buffer.DataBuffer;
     import org.springframework.http.HttpMethod;
     import org.springframework.http.HttpStatus;
+    import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
     import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+    import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
     import org.springframework.security.config.web.server.ServerHttpSecurity;
     import org.springframework.security.web.server.SecurityWebFilterChain;
     import org.springframework.security.web.server.authentication.HttpStatusServerEntryPoint;
@@ -16,14 +19,16 @@
 
     import java.nio.charset.StandardCharsets;
 
-    @Configuration
     @EnableWebFluxSecurity
+    @EnableReactiveMethodSecurity
+    @RequiredArgsConstructor
+    @Configuration
     public class SecurityConfig {
 
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
         @Bean
-        public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
-                                                             JwtAuthenticationManager jwtAuthManager,
-                                                             JwtSecurityContextRepository jwtRepo) {
+        public SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
             return http
                     .csrf(ServerHttpSecurity.CsrfSpec::disable)
                     .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable) // desactiva Basic Auth
@@ -39,8 +44,7 @@
                             ).permitAll()// login/register público
                             .anyExchange().authenticated()               // lo demás requiere JWT
                     )
-                    .authenticationManager(jwtAuthManager)
-                    .securityContextRepository(jwtRepo)
+                    .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                     .exceptionHandling(exception -> exception
                             .authenticationEntryPoint(new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED)) // 401
                             .accessDeniedHandler(customAccessDeniedHandler()) // 403

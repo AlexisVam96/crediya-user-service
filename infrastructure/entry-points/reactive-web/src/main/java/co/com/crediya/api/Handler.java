@@ -1,6 +1,9 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.dto.CreateUserDto;
+import co.com.crediya.api.dto.LoginDto;
+import co.com.crediya.api.mapper.LoginDtoMapper;
+import co.com.crediya.api.mapper.TokenDtoMapper;
 import co.com.crediya.api.mapper.UserDtoMapper;
 import co.com.crediya.model.exception.ErrorType;
 import co.com.crediya.model.exception.UserCustomException;
@@ -19,6 +22,10 @@ public class Handler {
     private final UserUseCase userUseCase;
 
     private final UserDtoMapper userDtoMapper;
+
+    private final TokenDtoMapper tokenDtoMapper;
+
+    private final LoginDtoMapper loginDtoMapper;
 
     public Mono<ServerResponse> listenGETAllUsers(ServerRequest serverRequest) {
         return userUseCase.getAllUsers()
@@ -43,10 +50,11 @@ public class Handler {
     }
 
     public Mono<ServerResponse> listenPOSTloginUser(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(CreateUserDto.class)
-                .map(userDtoMapper::toModel)
+        return serverRequest.bodyToMono(LoginDto.class)
+                .map(loginDtoMapper::toModel)
                 .flatMap(userUseCase::login)
-                .flatMap(token -> ServerResponse.ok().bodyValue(token));
+                .map(tokenDtoMapper::toResponse)
+                .flatMap(tokenDto -> ServerResponse.ok().bodyValue(tokenDto));
     }
 
 }

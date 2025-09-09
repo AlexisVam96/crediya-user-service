@@ -4,6 +4,7 @@ import co.com.crediya.model.exception.ErrorType;
 import co.com.crediya.model.exception.UserCustomException;
 import co.com.crediya.model.role.gateways.RoleRepository;
 import co.com.crediya.model.security.AuthToken;
+import co.com.crediya.model.security.Login;
 import co.com.crediya.model.security.TokenProvider;
 import co.com.crediya.model.security.PasswordEncoder;
 import co.com.crediya.model.user.User;
@@ -45,10 +46,10 @@ public class UserUseCase {
                 .switchIfEmpty(Mono.error(new UserCustomException("User's document number not found", ErrorType.NOT_FOUND)));
     }
 
-    public Mono<AuthToken> login(User user) {
-        return userRepository.findByEmail(user.getEmail())
+    public Mono<AuthToken> login(Login login) {
+        return userRepository.findByEmail(login.getEmail())
             .switchIfEmpty(Mono.error(new UserCustomException("User's email not found", ErrorType.NOT_FOUND)))
-            .flatMap(userDb -> passwordEncoder.matches(user.getPassword(), userDb.getPassword())
+            .flatMap(userDb -> passwordEncoder.matches(login.getPassword(), userDb.getPassword())
                 .flatMap(isValid -> {
                     if (!isValid) {
                         return Mono.error(new UserCustomException("Invalid credentials", ErrorType.VALIDATION));

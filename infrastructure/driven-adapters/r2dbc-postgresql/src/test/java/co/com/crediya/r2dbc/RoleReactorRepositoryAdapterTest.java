@@ -1,6 +1,7 @@
 package co.com.crediya.r2dbc;
 
 import co.com.crediya.model.role.Role;
+import co.com.crediya.r2dbc.entity.RoleEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,34 @@ class RoleReactorRepositoryAdapterTest {
                 .verifyComplete();
 
         verify(repository, times(1)).existsByIdRole(idRole);
+    }
+
+    @Test
+    void findByIdRole_shouldReturnMappedRole() {
+        Integer idRole = 1;
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setIdRole(idRole);
+        roleEntity.setName("ADMIN");
+
+        Role expectedRole = Role.builder().idRole(idRole).name("ADMIN").build();
+
+        when(repository.findByIdRole(idRole)).thenReturn(Mono.just(roleEntity));
+        when(mapper.map(roleEntity, Role.class)).thenReturn(expectedRole);
+
+        StepVerifier.create(adapter.findByIdRole(idRole))
+                .expectNext(expectedRole)
+                .verifyComplete();
+
+        verify(repository, times(1)).findByIdRole(idRole);
+        verify(mapper, times(1)).map(roleEntity, Role.class);
+    }
+
+    @Test
+    void constructor_shouldCreateAdapterInstance() {
+        RoleReactorRepository mockRepository = mock(RoleReactorRepository.class);
+        ObjectMapper mockMapper = mock(ObjectMapper.class);
+        RoleReactorRepositoryAdapter adapterInstance = new RoleReactorRepositoryAdapter(mockRepository, mockMapper);
+        Assertions.assertNotNull(adapterInstance);
     }
 
 }

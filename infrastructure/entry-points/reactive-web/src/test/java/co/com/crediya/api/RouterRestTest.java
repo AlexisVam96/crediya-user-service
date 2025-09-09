@@ -1,8 +1,15 @@
 package co.com.crediya.api;
 
+import ch.qos.logback.core.subst.Token;
 import co.com.crediya.api.dto.CreateUserDto;
+import co.com.crediya.api.dto.LoginDto;
+import co.com.crediya.api.dto.TokenDto;
 import co.com.crediya.api.dto.UserDto;
+import co.com.crediya.api.mapper.LoginDtoMapper;
+import co.com.crediya.api.mapper.TokenDtoMapper;
 import co.com.crediya.api.mapper.UserDtoMapper;
+import co.com.crediya.model.security.AuthToken;
+import co.com.crediya.model.security.Login;
 import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.user.UserUseCase;
 import org.assertj.core.api.Assertions;
@@ -39,6 +46,12 @@ class RouterRestTest {
 
     @MockBean
     private UserDtoMapper userDtoMapper;
+
+    @MockBean
+    private LoginDtoMapper loginDtoMapper;
+
+    @MockBean
+    private TokenDtoMapper tokenDtoMapper;
 
     private UserDto userDto() {
         UserDto userDto = new UserDto();
@@ -131,6 +144,45 @@ class RouterRestTest {
                 .expectBody(UserDto.class)
                 .value(response -> {
                     Assertions.assertThat(response.getEmail()).isEqualTo("john.doe@example.com");
+                });
+    }
+
+    @Test
+    void testListenPOSTloginUser_shouldReturnOkResponse() {
+        // Arrange
+        String email = "john.doe@example.com";
+        String password = "password123";
+
+        var loginDto = new LoginDto();
+        loginDto.setEmail(email);
+        loginDto.setPassword(password);
+
+        // Mocked domain model and token objects
+        var loginModel = new Login();
+        loginModel.setEmail(email);
+        loginModel.setPassword(password);
+
+        var tokenModel = new AuthToken();
+        tokenModel.setToken("mocked-jwt-token");
+
+        var tokenResponse = new TokenDto();
+        tokenResponse.setToken("mocked-jwt-token");
+
+        // Mock mappers and use case
+        when(loginDtoMapper.toModel(any(LoginDto.class))).thenReturn(loginModel);
+        when(userUseCase.login(any())).thenReturn(Mono.just(tokenModel));
+        when(tokenDtoMapper.toResponse(any(AuthToken.class))).thenReturn(tokenResponse);
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(loginDto)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(TokenDto.class)
+                .value(response -> {
+                    Assertions.assertThat(response.getToken()).isEqualTo("mocked-jwt-token");
                 });
     }
 
