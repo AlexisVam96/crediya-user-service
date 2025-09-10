@@ -12,6 +12,7 @@ spring:
     url: r2dbc:postgresql://${SPRING_R2DBC_HOST:localhost}:5432/db_crediya_user
     username: ${SPRING_R2DBC_USERNAME:admin}
     password: ${SPRING_R2DBC_PASSWORD:admin}
+    host: ${SPRING_R2DBC_HOST:localhost}
   sql:
     init:
       platform: postgresql
@@ -30,7 +31,7 @@ cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 
 jwt:
-  secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
+  secret: mysupersecretkey-crediya-1234567890
   expiration: 3600000 # 1 hour in milliseconds
 
 db:

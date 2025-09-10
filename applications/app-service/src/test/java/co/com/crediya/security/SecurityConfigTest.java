@@ -1,5 +1,6 @@
 import co.com.crediya.model.exception.UserCustomException;
-import co.com.crediya.security.JwtAuthenticationFilter;
+import co.com.crediya.security.JwtAuthenticationManager;
+import co.com.crediya.security.JwtSecurityContextRepository;
 import co.com.crediya.security.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,13 +16,15 @@ import static org.mockito.Mockito.*;
 
 class SecurityConfigTest {
 
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private JwtAuthenticationManager jwtAuthenticationManager;
+    private JwtSecurityContextRepository jwtSecurityContextRepository;
     private SecurityConfig securityConfig;
 
     @BeforeEach
     void setUp() {
-        jwtAuthenticationFilter = mock(JwtAuthenticationFilter.class);
-        securityConfig = new SecurityConfig(jwtAuthenticationFilter);
+        jwtAuthenticationManager = mock(JwtAuthenticationManager.class);
+        jwtSecurityContextRepository = mock(JwtSecurityContextRepository.class);
+        securityConfig = new SecurityConfig(jwtAuthenticationManager, jwtSecurityContextRepository);
     }
 
     @Test

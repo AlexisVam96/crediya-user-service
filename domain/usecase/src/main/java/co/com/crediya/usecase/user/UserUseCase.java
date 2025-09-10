@@ -47,6 +47,7 @@ public class UserUseCase {
     }
 
     public Mono<AuthToken> login(Login login) {
+        log.info("UserUseCase.login: Starting login for email " + login.getEmail());
         return userRepository.findByEmail(login.getEmail())
             .switchIfEmpty(Mono.error(new UserCustomException("User's email not found", ErrorType.NOT_FOUND)))
             .flatMap(userDb -> passwordEncoder.matches(login.getPassword(), userDb.getPassword())

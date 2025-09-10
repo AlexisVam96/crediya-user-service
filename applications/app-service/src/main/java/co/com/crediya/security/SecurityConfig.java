@@ -2,6 +2,7 @@
 
     import co.com.crediya.model.exception.ErrorType;
     import co.com.crediya.model.exception.UserCustomException;
+    import lombok.AllArgsConstructor;
     import lombok.RequiredArgsConstructor;
     import org.springframework.context.annotation.Bean;
     import org.springframework.context.annotation.Configuration;
@@ -19,13 +20,17 @@
 
     import java.nio.charset.StandardCharsets;
 
-    @EnableWebFluxSecurity
-    @EnableReactiveMethodSecurity
-    @RequiredArgsConstructor
     @Configuration
+    @EnableWebFluxSecurity
     public class SecurityConfig {
 
-        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final JwtAuthenticationManager jwtAuthenticationManager;
+        private final JwtSecurityContextRepository jwtSecurityContextRepository;
+
+        public SecurityConfig(JwtAuthenticationManager jwtAuthenticationManager, JwtSecurityContextRepository jwtSecurityContextRepository) {
+            this.jwtSecurityContextRepository = jwtSecurityContextRepository;
+            this.jwtAuthenticationManager = jwtAuthenticationManager;
+        }
 
         @Bean
         public SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
@@ -44,7 +49,8 @@
                             ).permitAll()// login/register público
                             .anyExchange().authenticated()               // lo demás requiere JWT
                     )
-                    .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                    .authenticationManager(jwtAuthenticationManager)
+                    .securityContextRepository(jwtSecurityContextRepository)
                     .exceptionHandling(exception -> exception
                             .authenticationEntryPoint(new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED)) // 401
                             .accessDeniedHandler(customAccessDeniedHandler()) // 403
