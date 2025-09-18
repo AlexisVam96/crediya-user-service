@@ -206,6 +206,68 @@ public class RouterRest {
                     )
                 }
             )
+        ),
+        @RouterOperation(
+            path = "/api/v1/login",
+            method = RequestMethod.POST,
+            beanClass = Handler.class,
+            beanMethod = "listenPOSTloginUser",
+            operation = @Operation(
+                operationId = "loginUser",
+                summary = "User Login",
+                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User login credentials",
+                    required = true,
+                    content = @Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = co.com.crediya.api.dto.LoginDto.class),
+                        examples = {
+                            @ExampleObject(
+                                    name = "Valid Login User",
+                                    description = "Login with admin credentials",
+                                    value = "{\n" +
+                                            "  \"email\": \"junior.pajuelo@crediya.com\",\n" +
+                                            "  \"password\": \"1234\"\n" +
+                                            "}"
+                            ),
+                            @ExampleObject(
+                                    name = "Valid Login Admin",
+                                    description = "Login with user credentials",
+                                    value = "{\n" +
+                                            "  \"email\": \"jhon.doe@crediya.com\",\n" +
+                                            "  \"password\": \"12345\"\n" +
+                                            "}"
+                            ),
+                            @ExampleObject(
+                                    name = "Invalid Password",
+                                    description = "Login with invalid password",
+                                    value = "{\n" +
+                                            "  \"email\": \"alexis.doe@crediya.com\",\n" +
+                                            "  \"password\": \"wrongpassword\"\n" +
+                                            "}"
+                            )
+                        }
+                    )
+                ),
+                responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Login successful",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = co.com.crediya.api.dto.TokenDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Invalid credentials",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = co.com.crediya.api.dto.ErrorResponse.class)
+                            )
+                    )
+                }
+            )
         )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
