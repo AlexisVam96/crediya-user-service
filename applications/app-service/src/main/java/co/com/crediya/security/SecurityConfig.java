@@ -45,7 +45,8 @@
                                     "/swagger-ui.html",
                                     "/swagger-ui/**",
                                     "/v3/api-docs/**",
-                                    "/webjars/**"
+                                    "/webjars/**",
+                                    "/actuator/**"
                             ).permitAll()// login/register público
                             .anyExchange().authenticated()               // lo demás requiere JWT
                     )
