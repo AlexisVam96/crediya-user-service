@@ -9,10 +9,13 @@ spring:
   devtools:
     add-properties: false
   r2dbc:
-    url: r2dbc:postgresql://${SPRING_R2DBC_HOST:localhost}:5432/db_crediya_user
     username: ${SPRING_R2DBC_USERNAME:admin}
     password: ${SPRING_R2DBC_PASSWORD:admin}
     host: ${SPRING_R2DBC_HOST:localhost}
+    port: ${SPRING_R2DBC_PORT:5432}
+    schema: public
+    database: ${SPRING_R2DBC_DB:db_crediya_user}
+    sslmode: ${SPRING_R2DBC_SSLMODE:AUTO}
   sql:
     init:
       platform: postgresql
@@ -33,7 +36,4 @@ cors:
 jwt:
   secret: mysupersecretkey-crediya-1234567890
   expiration: 3600000 # 1 hour in milliseconds
-
-db:
-  host: ${SPRING_R2DBC_HOST:localhost}
 

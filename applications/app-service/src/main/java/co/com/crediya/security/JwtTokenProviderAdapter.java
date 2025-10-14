@@ -33,7 +33,7 @@ public class JwtTokenProviderAdapter implements TokenProvider {
                 .addClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getKey(secret))
+                .signWith(getKey(secret), SignatureAlgorithm.HS256)
                 .compact()
         );
     }

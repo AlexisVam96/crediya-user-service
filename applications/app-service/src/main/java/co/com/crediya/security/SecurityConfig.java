@@ -61,10 +61,8 @@
 
         @Bean
         public ServerAccessDeniedHandler customAccessDeniedHandler() {
-            return (exchange, denied) -> {
-                return Mono.error(new UserCustomException("Access Denied: You do not have permission to access this resource.", ErrorType.FORBIDDEN));
-
-            };
+            return (exchange, denied) ->
+                    Mono.error(new UserCustomException("Access Denied: You do not have permission to access this resource.", ErrorType.FORBIDDEN));
         }
 
     }

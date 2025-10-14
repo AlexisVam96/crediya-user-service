@@ -49,23 +49,23 @@ public class UserUseCase {
     public Mono<AuthToken> login(Login login) {
         log.info("UserUseCase.login: Starting login for email " + login.getEmail());
         return userRepository.findByEmail(login.getEmail())
-            .switchIfEmpty(Mono.error(new UserCustomException("User's email not found", ErrorType.NOT_FOUND)))
-            .flatMap(userDb -> passwordEncoder.matches(login.getPassword(), userDb.getPassword())
-                .flatMap(isValid -> {
-                    if (!isValid) {
-                        return Mono.error(new UserCustomException("Invalid credentials", ErrorType.VALIDATION));
-                    }
-                    return roleRepository.findByIdRole(userDb.getIdRole())
-                        .switchIfEmpty(Mono.error(new UserCustomException("Role not found", ErrorType.NOT_FOUND)))
-                        .flatMap(role -> {
-                            Map<String, Object> claims = new HashMap<>();
-                            claims.put("role", role.getName());
-                            claims.put("email", userDb.getEmail());
-                            return tokenProvider.generateToken(userDb.getEmail(), claims)
-                                    .map(AuthToken::new);
-                        });
-                })
-            );
+                    .switchIfEmpty(Mono.error(new UserCustomException("User's email not found", ErrorType.NOT_FOUND)))
+                    .flatMap(userDb -> passwordEncoder.matches(login.getPassword(), userDb.getPassword())
+                    .flatMap(isValid -> {
+                        if (!isValid) {
+                            return Mono.error(new UserCustomException("Invalid credentials", ErrorType.VALIDATION));
+                        }
+                        return roleRepository.findByIdRole(userDb.getIdRole())
+                            .switchIfEmpty(Mono.error(new UserCustomException("Role not found", ErrorType.NOT_FOUND)))
+                            .flatMap(role -> {
+                                Map<String, Object> claims = new HashMap<>();
+                                claims.put("role", role.getName());
+                                claims.put("email", userDb.getEmail());
+                                return tokenProvider.generateToken(userDb.getEmail(), claims)
+                                        .map(AuthToken::new);
+                            });
+                        })
+                    );
     }
 
     public Mono<User> save(User user) {
