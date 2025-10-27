@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Build Maven') {
             steps {
-                bat './gradlew clean build -x test'
+                bat 'gradle clean build -x test'
             }
         }
     }
