@@ -25,7 +25,8 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Copiar el jar generado desde la etapa de build
-COPY --from=builder /home/gradle/project/applications/app-service/build/libs/crediya-user-service.jar app.jar
+#COPY --from=builder /home/gradle/project/applications/app-service/build/libs/crediya-user-service.jar app.jar
+COPY applications/app-service/build/libs/crediya-user-service.jar app.jar
 
 # Variables de entorno para JVM
 ENV JAVA_OPTS=" -XX:+UseContainerSupport -XX:MaxRAMPercentage=70 -Djava.security.egd=file:/dev/./urandom"
