@@ -3,13 +3,13 @@ pipeline {
 
     tools {
         jdk 'jdk17'       // el nombre configurado en Global Tool Configuration
-        maven 'Maven'     // idem para Maven
+        gradle 'Gradle'    // idem para Maven
     }
 
     stages {
         stage('Build Maven') {
             steps {
-                bat 'mvn clean install -DskipTests'
+                bat './gradlew clean build -x test'
             }
         }
     }
