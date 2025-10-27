@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @ToString
 public class User {
 
-    private Integer id_user;
+    private Integer idUser;
     private String firstName;
     private String lastName;
     private LocalDate birthDate;
@@ -23,4 +23,7 @@ public class User {
     private String phoneNumber;
     private String email;
     private BigDecimal salary;
+    private Integer idRole;
+    private String documentNumber;
+    private String password;
 }

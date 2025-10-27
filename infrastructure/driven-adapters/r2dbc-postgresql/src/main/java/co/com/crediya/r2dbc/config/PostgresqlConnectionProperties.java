@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Configuration
+@ConfigurationProperties(prefix = "spring.r2dbc")
 public class PostgresqlConnectionProperties {
 
     private String database;
@@ -17,5 +21,6 @@ public class PostgresqlConnectionProperties {
     private String password;
     private String host;
     private Integer port;
+    private String sslmode;
 
 }

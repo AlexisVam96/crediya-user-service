@@ -6,6 +6,7 @@ import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.postgresql.PostgresqlConnectionConfiguration;
 import io.r2dbc.postgresql.PostgresqlConnectionFactory;
 
+import io.r2dbc.postgresql.client.SSLMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,17 +18,8 @@ public class PostgreSQLConnectionPool {
     public static final int MAX_IDLE_TIME = 30;
 
 	@Bean
-	public ConnectionPool getConnectionConfig() {
-        // TODO: change these properties for yours
-		PostgresqlConnectionProperties pgProperties = new PostgresqlConnectionProperties();
-		pgProperties.setDatabase("db_crediya_user");
-		pgProperties.setHost("localhost");
-		pgProperties.setPort(5432);
-		pgProperties.setUsername("admin");
-		pgProperties.setPassword("admin");
-		pgProperties.setSchema("public");
-
-		return buildConnectionConfiguration(pgProperties);
+	public ConnectionPool getConnectionConfig(PostgresqlConnectionProperties properties) {
+		return buildConnectionConfiguration(properties);
 	}
 
 	private ConnectionPool buildConnectionConfiguration(PostgresqlConnectionProperties properties) {
@@ -38,6 +30,7 @@ public class PostgreSQLConnectionPool {
 				.schema(properties.getSchema())
 				.username(properties.getUsername())
 				.password(properties.getPassword())
+				.sslMode(properties.getSslmode().equals("REQUIRE") ?  SSLMode.REQUIRE : SSLMode.DISABLE)
 				.build();
 
         ConnectionPoolConfiguration poolConfiguration = ConnectionPoolConfiguration.builder()

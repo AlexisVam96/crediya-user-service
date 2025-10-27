@@ -1,7 +1,15 @@
 package co.com.crediya.api;
 
+import ch.qos.logback.core.subst.Token;
+import co.com.crediya.api.dto.CreateUserDto;
+import co.com.crediya.api.dto.LoginDto;
+import co.com.crediya.api.dto.TokenDto;
 import co.com.crediya.api.dto.UserDto;
+import co.com.crediya.api.mapper.LoginDtoMapper;
+import co.com.crediya.api.mapper.TokenDtoMapper;
 import co.com.crediya.api.mapper.UserDtoMapper;
+import co.com.crediya.model.security.AuthToken;
+import co.com.crediya.model.security.Login;
 import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.user.UserUseCase;
 import org.assertj.core.api.Assertions;
@@ -13,14 +21,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
@@ -34,6 +46,12 @@ class RouterRestTest {
 
     @MockBean
     private UserDtoMapper userDtoMapper;
+
+    @MockBean
+    private LoginDtoMapper loginDtoMapper;
+
+    @MockBean
+    private TokenDtoMapper tokenDtoMapper;
 
     private UserDto userDto() {
         UserDto userDto = new UserDto();
@@ -51,6 +69,15 @@ class RouterRestTest {
         user.setEmail("john.doe@example.com");
         // Set other required fields as needed
         return user;
+    }
+
+    private CreateUserDto createUserDto() {
+        CreateUserDto createUserDto = new CreateUserDto();
+        createUserDto.setFirstName("John");
+        createUserDto.setLastName("Doe");
+        createUserDto.setEmail("john.doe@example.com");
+        // Set other required fields as needed
+        return createUserDto;
     }
 
 
@@ -79,28 +106,84 @@ class RouterRestTest {
     }
 
     @Test
-    void testListenGETAllUsersSuccessfully2() {
-        UserDto userDto = userDto();
+    void testListenPOSTSaveUser_shouldReturnOkResponse() {
+        CreateUserDto createUserDto = createUserDto();
         User user = user();
+        UserDto userDtoResponse = userDto();
 
-        when(userUseCase.getAllUsers()).thenReturn(Flux.just(user));
-        when(userDtoMapper.toResponse(List.of(user))).thenReturn(Collections.singletonList(userDto));
+        when(userDtoMapper.toModel(any(CreateUserDto.class))).thenReturn(user);
+        when(userUseCase.save(any(User.class))).thenReturn(Mono.just(user));
+        when(userDtoMapper.toResponse(any(User.class))).thenReturn(userDtoResponse);
 
-
-        Flux<UserDto> responseBody = webTestClient.get()
+        webTestClient.post()
                 .uri("/api/v1/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(createUserDto)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserDto.class)
+                .value(response -> {
+                    Assertions.assertThat(response.getEmail()).isEqualTo("john.doe@example.com");
+                });
+    }
+
+    @Test
+    void testListenGETFindUserByDocumentNumber_shouldReturnOkResponse() {
+        String documentNumber = "12345678";
+        User user = user();
+        UserDto userDtoResponse = userDto();
+
+        when(userUseCase.getUserByDocumentNumber(documentNumber)).thenReturn(Mono.just(user));
+        when(userDtoMapper.toResponse(user)).thenReturn(userDtoResponse);
+
+        webTestClient.get()
+                .uri("/api/v1/user/{documentNumber}", documentNumber)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .returnResult(UserDto.class)
-                .getResponseBody();
-
-        StepVerifier.create(responseBody)
-                .expectSubscription()
-                .expectNext(userDto)
-                .verifyComplete();
+                .expectBody(UserDto.class)
+                .value(response -> {
+                    Assertions.assertThat(response.getEmail()).isEqualTo("john.doe@example.com");
+                });
     }
 
+    @Test
+    void testListenPOSTloginUser_shouldReturnOkResponse() {
+        // Arrange
+        String email = "john.doe@example.com";
+        String password = "password123";
 
+        var loginDto = new LoginDto();
+        loginDto.setEmail(email);
+        loginDto.setPassword(password);
+
+        // Mocked domain model and token objects
+        var loginModel = new Login();
+        loginModel.setEmail(email);
+        loginModel.setPassword(password);
+
+        var tokenModel = new AuthToken();
+        tokenModel.setToken("mocked-jwt-token");
+
+        var tokenResponse = new TokenDto();
+        tokenResponse.setToken("mocked-jwt-token");
+
+        // Mock mappers and use case
+        when(loginDtoMapper.toModel(any(LoginDto.class))).thenReturn(loginModel);
+        when(userUseCase.login(any())).thenReturn(Mono.just(tokenModel));
+        when(tokenDtoMapper.toResponse(any(AuthToken.class))).thenReturn(tokenResponse);
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(loginDto)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(TokenDto.class)
+                .value(response -> {
+                    Assertions.assertThat(response.getToken()).isEqualTo("mocked-jwt-token");
+                });
+    }
 
 }

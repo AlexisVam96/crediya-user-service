@@ -4,10 +4,13 @@ import co.com.crediya.model.role.Role;
 import co.com.crediya.model.role.gateways.RoleRepository;
 import co.com.crediya.r2dbc.entity.RoleEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
+import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 @Repository
+@Slf4j
 public class RoleReactorRepositoryAdapter extends ReactiveAdapterOperations<Role, RoleEntity, Integer, RoleReactorRepository>
         implements RoleRepository
 {
@@ -20,4 +23,19 @@ public class RoleReactorRepositoryAdapter extends ReactiveAdapterOperations<Role
         super(repository, mapper, d -> mapper.map(d, Role.class));
     }
 
+
+    @Override
+    public Mono<Boolean> existsByIdRole(Integer idRole) {
+        log.info("Checking existence of Role with idRole: {}", idRole);
+        return repository.existsByIdRole(idRole);
+    }
+
+    @Override
+    public Mono<Role> findByIdRole(Integer idRole) {
+        return repository.findByIdRole(idRole)
+                .map(roleEntity -> {
+                    log.info("Role found with idRole {}: {}", idRole, roleEntity);
+                    return mapper.map(roleEntity, Role.class);
+                });
+    }
 }

@@ -4,17 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class EditUserDto {
 
-    private Integer id_user;
+    private Integer idUser;
     private String firstName;
     private String lastName;
-    private String birthDate;
+    private LocalDate birthDate;
     private String address;
     private String phoneNumber;
     private String email;
-    private String salary;
+    private BigDecimal salary;
 }
