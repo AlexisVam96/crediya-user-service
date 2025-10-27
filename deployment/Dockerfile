@@ -1,21 +1,21 @@
 # =========================
 # 1. Etapa de build (Gradle)
 # =========================
-FROM gradle:8.14.3-jdk17-alpine AS builder
+#FROM gradle:8.14.3-jdk17-alpine AS builder
 
 # Configurar directorio de trabajo
-WORKDIR /home/gradle/project
+#WORKDIR /home/gradle/project
 
 # Copiar archivos de configuración primero para cachear dependencias
-COPY build.gradle settings.gradle gradlew ./
-COPY gradle ./gradle
+#COPY build.gradle settings.gradle gradlew ./
+#COPY gradle ./gradle
 
 # Descargar dependencias (sin compilar todo aún)
-RUN ./gradlew dependencies --no-daemon || return 0
+#RUN ./gradlew dependencies --no-daemon || return 0
 
 # Copiar todo el código y compilar
-COPY . .
-RUN ./gradlew clean build -x test --no-daemon
+#COPY . .
+#RUN ./gradlew clean build -x test --no-daemon
 
 # =========================
 # 2. Etapa de runtime (JRE ligero)
