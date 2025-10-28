@@ -30,28 +30,32 @@ pipeline {
             }
         }
 
-        stage('Login to Azure') {
+        stage('Push to ACR') {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: 'AZURE_SP')]) {
                     bat """
-                        echo Logging into Azure...
-                        az login --service-principal --username %AZURE_CLIENT_ID% --password %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%
+                        echo === LOGIN TO AZURE ===
+                        az login --service-principal ^
+                                 --username %AZURE_CLIENT_ID% ^
+                                 --password %AZURE_CLIENT_SECRET% ^
+                                 --tenant %AZURE_TENANT_ID%
 
-                        echo CLIENT_ID=%AZURE_CLIENT_ID%
-                        echo TENANT_ID=%AZURE_TENANT_ID%
-                        echo IMAGE_TAG=%IMAGE_TAG%
-                        az account show
-
+                        echo === LOGIN TO ACR ===
                         az acr login --name crediyauserregistry
 
-                        echo Pushing image: %ACR_NAME%/%IMAGE_NAME%:%IMAGE_TAG%
-                        docker push %ACR_NAME%/%IMAGE_NAME%:%IMAGE_TAG%
+                        echo === VERIFY ACR LOGIN ===
+                        docker info
 
+                        echo === PUSH IMAGE ===
+                        docker push crediyauserregistry.azurecr.io/crediya-user-service:%BUILD_NUMBER%
+
+                        echo === VERIFY REPOSITORY TAGS ===
                         az acr repository show-tags --name crediyauserregistry --repository crediya-user-service --output table
                     """
                 }
             }
         }
+
 
 
 
