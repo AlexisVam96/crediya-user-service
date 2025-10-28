@@ -40,6 +40,11 @@ pipeline {
                                  --password %AZURE_CLIENT_SECRET% ^
                                  --tenant %AZURE_TENANT_ID%
 
+                        echo CLIENT_ID=%AZURE_CLIENT_ID%
+                        echo TENANT_ID=%AZURE_TENANT_ID%
+                        echo IMAGE_TAG=%IMAGE_TAG%
+                        az account show
+
                         az acr login --name crediyauserregistry
 
                         echo Pushing image: %ACR_NAME%/%IMAGE_NAME%:%IMAGE_TAG%
