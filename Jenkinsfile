@@ -33,13 +33,14 @@ pipeline {
         stage('Login to Azure') {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: 'AZURE_SP')]) {
-                    sh '''
-                        az login --service-principal \
-                                 --username $AZURE_CLIENT_ID \
-                                 --password $AZURE_CLIENT_SECRET \
-                                 --tenant $AZURE_TENANT_ID
+                    bat """
+                        az login --service-principal ^
+                                 --username %AZURE_CLIENT_ID% ^
+                                 --password %AZURE_CLIENT_SECRET% ^
+                                 --tenant %AZURE_TENANT_ID%
                         az acr login --name crediyauserregistry
-                    '''
+                        docker push crediyauserregistry.azurecr.io/crediya-user-service:%BUILD_NUMBER%
+                    """
                 }
             }
         }
