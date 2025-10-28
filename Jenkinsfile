@@ -36,24 +36,18 @@ pipeline {
                     bat '''
                         echo %AZURE_CRED_JSON% > azure.json
 
-                        for /f "tokens=2 delims=:," %%a in ('findstr "clientId" azure.json') do set CLIENT_ID=%%~a
-                        set CLIENT_ID=%CLIENT_ID:"=%
-
-                        for /f "tokens=2 delims=:," %%a in ('findstr "clientSecret" azure.json') do set CLIENT_SECRET=%%~a
-                        set CLIENT_SECRET=%CLIENT_SECRET:"=%
-
-                        for /f "tokens=2 delims=:," %%a in ('findstr "tenantId" azure.json') do set TENANT_ID=%%~a
-                        set TENANT_ID=%TENANT_ID:"=%
+                        for /f %%i in ('jq -r ".clientId" azure.json') do set CLIENT_ID=%%i
+                        for /f %%i in ('jq -r ".clientSecret" azure.json') do set CLIENT_SECRET=%%i
+                        for /f %%i in ('jq -r ".tenantId" azure.json') do set TENANT_ID=%%i
 
                         az login --service-principal --username %CLIENT_ID% --password %CLIENT_SECRET% --tenant %TENANT_ID%
-
                         az acr login --name crediyauserregistry
-
                         docker push %ACR_NAME%/%IMAGE_NAME%:%IMAGE_TAG%
                     '''
                 }
             }
         }
+
 
     }
 
