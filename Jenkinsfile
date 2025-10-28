@@ -30,19 +30,15 @@ pipeline {
             }
         }
 
-        stage('Login to Azure & Push Image') {
+        stage('Login to Azure') {
             steps {
-                withCredentials([string(credentialsId: 'AZURE_CREDENTIALS', variable: 'AZURE_CRED_JSON')]) {
-                    bat '''
-                        echo %AZURE_CRED_JSON% > azure.json
-
-                        for /f %%i in ('jq -r ".clientId" azure.json') do set CLIENT_ID=%%i
-                        for /f %%i in ('jq -r ".clientSecret" azure.json') do set CLIENT_SECRET=%%i
-                        for /f %%i in ('jq -r ".tenantId" azure.json') do set TENANT_ID=%%i
-
-                        az login --service-principal --username %CLIENT_ID% --password %CLIENT_SECRET% --tenant %TENANT_ID%
+                withCredentials([azureServicePrincipal(credentialsId: 'AZURE_SP')]) {
+                    sh '''
+                        az login --service-principal \
+                                 --username $AZURE_CLIENT_ID \
+                                 --password $AZURE_CLIENT_SECRET \
+                                 --tenant $AZURE_TENANT_ID
                         az acr login --name crediyauserregistry
-                        docker push %ACR_NAME%/%IMAGE_NAME%:%IMAGE_TAG%
                     '''
                 }
             }
