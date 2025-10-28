@@ -30,12 +30,31 @@ pipeline {
             }
         }
 
-        stage('Login to ACR') {
+        stage('Login to Azure & Push Image') {
             steps {
-                echo '🔑 Logging into Azure Container Registry...'
-                bat "az acr login --name %ACR_NAME%"
+                withCredentials([string(credentialsId: 'AZURE_CREDENTIALS', variable: 'AZURE_CRED_JSON')]) {
+                    bat '''
+                        echo %AZURE_CRED_JSON% > azure.json
+
+                        for /f "tokens=2 delims=:," %%a in ('findstr "clientId" azure.json') do set CLIENT_ID=%%~a
+                        set CLIENT_ID=%CLIENT_ID:"=%
+
+                        for /f "tokens=2 delims=:," %%a in ('findstr "clientSecret" azure.json') do set CLIENT_SECRET=%%~a
+                        set CLIENT_SECRET=%CLIENT_SECRET:"=%
+
+                        for /f "tokens=2 delims=:," %%a in ('findstr "tenantId" azure.json') do set TENANT_ID=%%~a
+                        set TENANT_ID=%TENANT_ID:"=%
+
+                        az login --service-principal --username %CLIENT_ID% --password %CLIENT_SECRET% --tenant %TENANT_ID%
+
+                        az acr login --name crediyauserregistry
+
+                        docker push %ACR_NAME%/%IMAGE_NAME%:%IMAGE_TAG%
+                    '''
+                }
             }
         }
+
     }
 
 }
