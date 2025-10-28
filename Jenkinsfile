@@ -30,7 +30,7 @@ pipeline {
             }
         }
 
-        stage('Login to Azure') {
+         stage('Login to Azure') {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: 'AZURE_SP')]) {
                     bat """
