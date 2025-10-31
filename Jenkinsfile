@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'jdk17'       // el nombre configurado en Global Tool Configuration
-    }
-
     environment {
         ACR_NAME = 'crediyauserregistry.azurecr.io'
         IMAGE_NAME = 'crediya-user-service'
